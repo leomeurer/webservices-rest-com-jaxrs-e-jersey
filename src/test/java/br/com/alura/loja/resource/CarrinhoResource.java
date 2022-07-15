@@ -1,12 +1,16 @@
 package br.com.alura.loja.resource;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -15,7 +19,6 @@ import br.com.alura.loja.modelo.Carrinho;
 
 @Path("carrinhos")
 public class CarrinhoResource {
-
 
 	// Parametro faz parte da URI
 	@Path("{id}")
@@ -26,15 +29,15 @@ public class CarrinhoResource {
 		System.out.println(carrinho.toXML());
 		return carrinho.toXML();
 	}
-	
+
 	@POST
-	public String adiciona(String conteudo) {		
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response adiciona(String conteudo) throws Exception {		
 		Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
 		new CarrinhoDAO().adiciona(carrinho);
-		return "<status>sucesso</status>";		
+		return Response.created(new URI("/carrinhos/"+carrinho.getId())).build();
+		
 	}
-	
-	
 
 //	// Perde a capacidade de cache, pois parametro não faz parte da URI
 //	@GET
@@ -52,8 +55,5 @@ public class CarrinhoResource {
 //		Carrinho carrinho = new CarrinhoDAO().busca(id);
 //		return carrinho.toJson();
 //	}	
-	
-	
-	
-	
+
 }
