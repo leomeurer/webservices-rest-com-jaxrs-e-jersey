@@ -29,7 +29,8 @@ public class CarrinhoDAO {
 								.adiciona(esporte2)
 								.para("Rua Carlos Andrade", "Paraná")
 								.setId(2l);
-		banco.put(2l, carrinho2);
+		long id = contador.incrementAndGet();
+		banco.put(id, carrinho2);
 		
 		
 	}
