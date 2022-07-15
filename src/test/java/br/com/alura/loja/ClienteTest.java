@@ -8,6 +8,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,10 +23,17 @@ import br.com.alura.loja.modelo.Produto;
 public class ClienteTest {
 
 	private HttpServer server;
+	private WebTarget target;
+	private Client client;
 
 	@Before
 	public void before() {
 		server = Servidor.inicializaServidor();
+		ClientConfig config = new ClientConfig();
+		config.register(new LoggingFilter());
+		this.client = ClientBuilder.newClient(config);
+		this.target = client.target("http://localhost:8080");
+
 	}
 
 	@After
@@ -47,8 +56,6 @@ public class ClienteTest {
 	@Test
 	public void testeQueBuscaCarrinhoETrazOCarrinhoEsperado() {
 
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080");
 		String conteudo = target.path("/carrinhos/1").request().get(String.class);
 
 		Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
@@ -58,13 +65,11 @@ public class ClienteTest {
 
 	@Test
 	public void testeDeAdicionarNovoCarrinhoPorPost() {
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080");
 
 		String produto = "Produto a ser Criado 2233113kkshdn";
-		
+
 		Carrinho carrinho = new Carrinho();
-		carrinho.adiciona(new Produto(314L, produto , 999, 1));
+		carrinho.adiciona(new Produto(314L, produto, 999, 1));
 		carrinho.setRua("Rua Vergueiro");
 		carrinho.setCidade("Sao Paulo");
 
@@ -74,11 +79,10 @@ public class ClienteTest {
 
 		Response response = target.path("/carrinhos").request().post(entity);
 		Assert.assertEquals(201, response.getStatus());
-		
+
 		String location = response.getHeaderString("Location");
 		String conteudo = client.target(location).request().get(String.class);
-		Assert.assertTrue(conteudo.contains(produto ));
-
+		Assert.assertTrue(conteudo.contains(produto));
 
 	}
 
